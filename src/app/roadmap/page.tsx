@@ -9,30 +9,50 @@ import InterventionEditModal from '@/components/InterventionEditModal';
 import { Intervention, YearlyBudget } from '@/types/interventions';
 import { calculateTotalYearlyCosts } from '@/utils/costCalculations';
 
-// Test intervention for demonstration
-const testIntervention: Intervention = {
-  id: 1,
-  name: "Mental Health Platform",
-  description: "24/7 access to mental health professionals",
-  timeline: {
-    implementationStartDate: new Date(2025, 3, 1), // April 1, 2025
-    implementationEndDate: new Date(2025, 4, 31), // May 31, 2025
-    ongoingStartDate: new Date(2025, 5, 1), // June 1, 2025
-    ongoingEndDate: new Date(2026, 2, 31), // March 31, 2026
+// Test interventions for demonstration
+const testInterventions: Intervention[] = [
+  {
+    id: 1,
+    name: "Mental Health Platform",
+    description: "24/7 access to mental health professionals",
+    timeline: {
+      implementationStartDate: new Date(2025, 7, 1), // August 1, 2025
+      implementationEndDate: new Date(2025, 9, 31), // October 31, 2025
+      ongoingStartDate: new Date(2025, 8, 1), // September 1, 2025
+      ongoingEndDate: new Date(2027, 2, 12), // March 12, 2027
+    },
+    costs: {
+      implementationCost: 120000,
+      ongoingCostPEPM: 2.45,
+      ongoingCostFixed: 10000,
+      oneTimeFixedFee: 1500,
+    },
+    eligibleEmployees: 500,
   },
-  costs: {
-    implementationCost: 120000,
-    ongoingCostPEPM: 2.45,
-    ongoingCostFixed: 10000,
-    oneTimeFixedFee: 1500,
-  },
-  eligibleEmployees: 500,
-};
+  {
+    id: 2,
+    name: "Physical Wellness Program",
+    description: "Comprehensive wellness program for employees",
+    timeline: {
+      implementationStartDate: new Date(2026, 3, 1), // April 1, 2026
+      implementationEndDate: new Date(2026, 4, 31), // May 31, 2026
+      ongoingStartDate: new Date(2026, 5, 1), // June 1, 2026
+      ongoingEndDate: new Date(2028, 2, 12), // March 12, 2028
+    },
+    costs: {
+      implementationCost: 0,
+      ongoingCostPEPM: 3.33,
+      ongoingCostFixed: 0,
+      oneTimeFixedFee: 10000,
+    },
+    eligibleEmployees: 500,
+  }
+];
 
 export default function RoadmapPage() {
   const [startDate, setStartDate] = useState<Date>(new Date(2025, 2, 13)); // March 13, 2025
   const [yearlyBudget, setYearlyBudget] = useState<number>(500000);
-  const [selectedInterventions, setSelectedInterventions] = useState<Intervention[]>([testIntervention]);
+  const [selectedInterventions, setSelectedInterventions] = useState<Intervention[]>(testInterventions);
   const [editingIntervention, setEditingIntervention] = useState<Intervention | null>(null);
   const [yearlyBudgets, setYearlyBudgets] = useState<YearlyBudget[]>([
     { allocated: yearlyBudget, spent: 0, isOverBudget: false },
@@ -55,10 +75,10 @@ export default function RoadmapPage() {
 
   // Update yearly budgets when interventions or budget changes
   useEffect(() => {
-    const newYearlyBudgets = yearlyBudgets.map((budget, index) => {
+    const newYearlyBudgets = [0, 1, 2].map((index) => {
       const yearStart = addYears(startDate, index);
       const yearEnd = addYears(yearStart, 1);
-      const spent = calculateTotalYearlyCosts(selectedInterventions, yearStart, yearEnd);
+      const spent = calculateTotalYearlyCosts(selectedInterventions, yearStart, yearEnd, startDate);
       return {
         allocated: yearlyBudget,
         spent,
