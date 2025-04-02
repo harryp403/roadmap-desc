@@ -1,5 +1,6 @@
-import { format, differenceInDays, addYears } from 'date-fns';
+import { format, differenceInDays, addMonths, startOfDay } from 'date-fns';
 import { Intervention } from '@/types/interventions';
+import { getYearEndDate } from '@/utils/costCalculations';
 
 interface GanttChartProps {
   startDate: Date;
@@ -8,16 +9,34 @@ interface GanttChartProps {
 }
 
 export default function GanttChart({ startDate, interventions, onEdit }: GanttChartProps) {
-  const endDate = addYears(startDate, 3);
-  const totalDays = differenceInDays(endDate, startDate);
+  // Ensure start date is at the beginning of the day
+  const normalizedStartDate = startOfDay(startDate);
+  // End date is 3 years from start, minus 1 day
+  const endDate = getYearEndDate(addMonths(normalizedStartDate, 36));
+  const totalDays = differenceInDays(endDate, normalizedStartDate);
 
   const getPositionAndWidth = (start: Date, end: Date) => {
-    const position = Math.max(0, (differenceInDays(start, startDate) / totalDays) * 100);
+    // Normalize dates to start of day for consistent calculations
+    const normalizedStart = startOfDay(start);
+    const normalizedEnd = startOfDay(end);
+    
+    // Calculate position as percentage from start date
+    const position = Math.max(0, (differenceInDays(normalizedStart, normalizedStartDate) / totalDays) * 100);
+    
+    // Calculate width as percentage of total timeline
     const width = Math.min(
       100 - position,
-      (differenceInDays(end, start) / totalDays) * 100
+      ((differenceInDays(normalizedEnd, normalizedStart) + 1) / totalDays) * 100 // Add 1 to include both start and end days
     );
+    
     return { position, width };
+  };
+
+  // Get the label for a specific year
+  const getYearLabel = (yearIndex: number) => {
+    const yearStart = addMonths(normalizedStartDate, yearIndex * 12);
+    const yearEnd = getYearEndDate(yearStart);
+    return `${format(yearStart, 'dd/MM/yyyy')} - ${format(yearEnd, 'dd/MM/yyyy')}`;
   };
 
   return (
@@ -38,15 +57,11 @@ export default function GanttChart({ startDate, interventions, onEdit }: GanttCh
 
       <div className="border rounded-lg">
         <div className="grid grid-cols-3 border-b py-2 px-4">
-          {[0, 1, 2].map((year) => {
-            const yearStart = addYears(startDate, year);
-            const yearEnd = addYears(yearStart, 1);
-            return (
-              <div key={year} className="text-sm text-gray-600">
-                {format(yearStart, 'dd/MM/yyyy')} - {format(yearEnd, 'dd/MM/yyyy')}
-              </div>
-            );
-          })}
+          {[0, 1, 2].map((year) => (
+            <div key={year} className="text-sm text-gray-600">
+              {getYearLabel(year)}
+            </div>
+          ))}
         </div>
 
         <div className="divide-y">

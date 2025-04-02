@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { format, addYears } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 import { Intervention } from '@/types/interventions';
-import { calculateYearlyCosts } from '@/utils/costCalculations';
+import { calculateYearlyCosts, getYearEndDate } from '@/utils/costCalculations';
 
 interface CostTableProps {
   startDate: Date;
@@ -30,9 +30,8 @@ export default function CostTable({ startDate, interventions }: CostTableProps) 
 
   // Get year label based on startDate
   const getYearLabel = (yearIndex: number) => {
-    const yearStart = addYears(startDate, yearIndex);
-    const yearEnd = addYears(yearStart, 1);
-    yearEnd.setDate(yearEnd.getDate() - 1);
+    const yearStart = addMonths(startDate, yearIndex * 12);
+    const yearEnd = getYearEndDate(yearStart);
     
     return `${format(yearStart, 'dd/MM/yyyy')} - ${format(yearEnd, 'dd/MM/yyyy')}`;
   };
@@ -63,8 +62,8 @@ export default function CostTable({ startDate, interventions }: CostTableProps) 
           <tbody className="bg-white divide-y divide-gray-200">
             {interventions.map((intervention) => {
               const yearCosts = [0, 1, 2].map(year => {
-                const yearStart = addYears(startDate, year);
-                const yearEnd = addYears(yearStart, 1);
+                const yearStart = addMonths(startDate, year * 12);
+                const yearEnd = getYearEndDate(yearStart);
                 return calculateYearlyCosts(intervention, yearStart, yearEnd, startDate);
               });
               
@@ -152,8 +151,8 @@ export default function CostTable({ startDate, interventions }: CostTableProps) 
             <tr className="bg-gray-100">
               <td className="px-6 py-4 font-semibold" colSpan={2}>Total costs</td>
               {[0, 1, 2].map((year) => {
-                const yearStart = addYears(startDate, year);
-                const yearEnd = addYears(yearStart, 1);
+                const yearStart = addMonths(startDate, year * 12);
+                const yearEnd = getYearEndDate(yearStart);
                 let yearTotal = 0;
                 
                 interventions.forEach(intervention => {
