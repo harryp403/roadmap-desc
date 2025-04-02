@@ -1,5 +1,17 @@
-import { addMonths, differenceInMonths, isSameMonth, isWithinInterval, isBefore, isAfter } from 'date-fns';
+import { addMonths, differenceInMonths, isWithinInterval, isBefore, isAfter, addDays } from 'date-fns';
 import { Intervention } from '@/types/interventions';
+
+/**
+ * Creates a properly formatted date for the end of a year period (day before the next year starts)
+ * @param startDate Start date of the year
+ * @returns End date (one day before next year starts)
+ */
+export function getYearEndDate(startDate: Date): Date {
+  // Create a date exactly one year after the start date
+  const nextYearStart = addMonths(startDate, 12);
+  // Subtract one day to get the end of the current year period
+  return addDays(nextYearStart, -1);
+}
 
 /**
  * Determines which financial year a given date falls into
@@ -9,13 +21,17 @@ import { Intervention } from '@/types/interventions';
  */
 export function getFinancialYear(date: Date, roadmapStartDate: Date): number {
   const yearOneStart = new Date(roadmapStartDate);
+  const yearOneEnd = getYearEndDate(yearOneStart);
+  
   const yearTwoStart = addMonths(yearOneStart, 12);
+  const yearTwoEnd = getYearEndDate(yearTwoStart);
+  
   const yearThreeStart = addMonths(yearOneStart, 24);
-  const yearFourStart = addMonths(yearOneStart, 36);
+  const yearThreeEnd = getYearEndDate(yearThreeStart);
 
-  if (date >= yearOneStart && date < yearTwoStart) return 0; // Year 1
-  if (date >= yearTwoStart && date < yearThreeStart) return 1; // Year 2
-  if (date >= yearThreeStart && date < yearFourStart) return 2; // Year 3
+  if (date >= yearOneStart && date <= yearOneEnd) return 0; // Year 1
+  if (date >= yearTwoStart && date <= yearTwoEnd) return 1; // Year 2
+  if (date >= yearThreeStart && date <= yearThreeEnd) return 2; // Year 3
   return -1; // Outside the 3-year roadmap
 }
 

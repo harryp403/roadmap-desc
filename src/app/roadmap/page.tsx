@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { format, addYears } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 import BudgetGauges from '@/components/BudgetGauges';
 import GanttChart from '@/components/GanttChart';
 import CostTable from '@/components/CostTable';
 import InterventionEditModal from '@/components/InterventionEditModal';
 import { Intervention, YearlyBudget } from '@/types/interventions';
-import { calculateTotalYearlyCosts } from '@/utils/costCalculations';
+import { calculateTotalYearlyCosts, getYearEndDate } from '@/utils/costCalculations';
 
 // Test interventions for demonstration
 const testInterventions: Intervention[] = [
@@ -76,8 +76,8 @@ export default function RoadmapPage() {
   // Update yearly budgets when interventions or budget changes
   useEffect(() => {
     const newYearlyBudgets = [0, 1, 2].map((index) => {
-      const yearStart = addYears(startDate, index);
-      const yearEnd = addYears(yearStart, 1);
+      const yearStart = addMonths(startDate, index * 12);
+      const yearEnd = getYearEndDate(yearStart);
       const spent = calculateTotalYearlyCosts(selectedInterventions, yearStart, yearEnd, startDate);
       return {
         allocated: yearlyBudget,
@@ -94,7 +94,7 @@ export default function RoadmapPage() {
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-t-lg">
           <h1 className="text-3xl font-bold">Strategic roadmap</h1>
           <p className="mt-4">
-            It is tempting to try to do everything in one year - however, health and well-being is not a "one and done" activity. It is a journey, with each year building upon the next.
+            It is tempting to try to do everything in one year - however, health and well-being is not a &quot;one and done&quot; activity. It is a journey, with each year building upon the next.
           </p>
           <p className="mt-2">
             Pace yourself! Ongoing efforts will be needed to sustain health and wellbeing within your organisation.

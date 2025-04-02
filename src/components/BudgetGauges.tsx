@@ -1,5 +1,6 @@
-import { format, addYears } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 import { YearlyBudget } from '@/types/interventions';
+import { getYearEndDate } from '@/utils/costCalculations';
 
 interface BudgetGaugesProps {
   startDate: Date;
@@ -8,8 +9,8 @@ interface BudgetGaugesProps {
 
 export default function BudgetGauges({ startDate, yearlyBudgets }: BudgetGaugesProps) {
   const formatDateRange = (yearIndex: number) => {
-    const start = addYears(startDate, yearIndex);
-    const end = addYears(start, 1);
+    const start = addMonths(startDate, yearIndex * 12);
+    const end = getYearEndDate(start);
     return `${format(start, 'dd/MM/yyyy')}-${format(end, 'dd/MM/yyyy')}`;
   };
 
